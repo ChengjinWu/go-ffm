@@ -1,8 +1,8 @@
 package model
 
 type FfmNode struct {
-	Field   int     // field index
-	Feature int     // feature index
+	Field   int32   // field index
+	Feature int32   // feature index
 	Value   float32 // value
 }
 
