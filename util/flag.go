@@ -1,8 +1,8 @@
 package util
 
 import (
-	"ffm/model"
 	"flag"
+	"go-ffm/model"
 	"path"
 )
 

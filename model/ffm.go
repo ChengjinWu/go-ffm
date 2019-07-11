@@ -1,16 +1,16 @@
 package model
 
 type FfmNode struct {
-	Field   int32   // field index
-	Feature int32   // feature index
-	Value   float32 // value
+	Field   int     // field index
+	Feature int     // feature index
+	Value   float64 // value
 }
 
 type FfmModel struct {
-	FeaturesNumber      int32
-	FieldsNumber        int32
-	LatentFactorsNumber int32
-	W                   []float32
+	FeaturesNumber      int
+	FieldsNumber        int
+	LatentFactorsNumber int
+	W                   []float64
 	Normalization       bool
 }
 

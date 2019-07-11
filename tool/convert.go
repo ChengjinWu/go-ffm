@@ -1,23 +1,27 @@
-package core
+package main
 
 import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"github.com/lunny/log"
-	"go-ffm/model"
 	"math"
 	"os"
-	"testing"
-	"unsafe"
 )
 
-func GetLatentFactorsNumberAlignedJson(latentFactorsNumber int) int {
-	return int(math.Ceil(float64(latentFactorsNumber)/kALIGN) * kALIGN)
+const (
+	kALIGNByte   = 4
+	kALIGN       = kALIGNByte / 4
+	kCHUNK_SIZE  = 10000000
+	kMaxLineSize = 100000
+)
+
+func GetLatentFactorsNumberAlignedJson(latentFactorsNumber int32) int32 {
+	return int32(math.Ceil(float64(latentFactorsNumber)/kALIGN) * kALIGN)
 }
 
-func GetWSizeJson(ffmModel *model.FfmModel) int {
-	latentFactorsNumberAligned := GetLatentFactorsNumberAligned(ffmModel.LatentFactorsNumber)
+func GetWSizeJson(ffmModel *FfmModelJson) int32 {
+	latentFactorsNumberAligned := GetLatentFactorsNumberAlignedJson(ffmModel.LatentFactorsNumber)
 	return ffmModel.FeaturesNumber * ffmModel.FieldsNumber * latentFactorsNumberAligned * 2
 }
 
@@ -56,10 +60,11 @@ func FfmLoadModelToJson(modelPath string) (*FfmModelJson, error) {
 		log.Error(err)
 		return nil, err
 	}
-	wSize := GetWSize(&ffmModel)
-	ffmModel.W = make([]float64, wSize)
+	wSize := GetWSizeJson(&ffmModel)
+	ffmModel.W = make([]float32, wSize)
 	fmt.Println(wSize)
-	for offset := 0; offset < wSize; {
+	var offset int32 = 0
+	for offset < wSize {
 		nextOffset := min(wSize, offset+4*kCHUNK_SIZE)
 		currW := ffmModel.W[offset:nextOffset]
 		err = binary.Read(ffmModelFile, binary.LittleEndian, &currW)
@@ -74,14 +79,13 @@ func FfmLoadModelToJson(modelPath string) (*FfmModelJson, error) {
 	fmt.Println(string(jb))
 	return nil, nil
 }
-func TestModelParse(t *testing.T) {
-	FfmLoadModelToJson("../data/train.log.model")
-}
 
-func TestSizeof(t *testing.T) {
-	a := "abc"
-	b := len(a)
-	c := unsafe.Sizeof(a)
-	fmt.Println(int(c))
-	fmt.Println(a, b, c)
+func min(x, y int32) int32 {
+	if x > y {
+		return y
+	}
+	return x
+}
+func main() {
+	FfmLoadModelToJson("../data/train.log.model")
 }
